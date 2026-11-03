@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ARVION Marketplace — маркетплейс товаров от независимых продавцов.">
+    <title>ARVION Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a href="#" class="logo">ARVION</a>
+
+            <nav>
+                <a href="#catalog">Каталог</a>
+                <a href="#seller">Продавцам</a>
+                <a href="#account">Мой аккаунт</a>
+            </nav>
+
+            <div class="header-actions" id="headerActions">
+                <button id="loginBtn" class="btn btn-outline">Войти</button>
+                <button id="registerBtn" class="btn">Регистрация</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Покупай и продавай<br>на ARVION</h1>
+                <p>
+                    Маркетплейс независимых продавцов.
+                    Находи интересные товары и открывай собственный магазин.
+                </p>
+                <a href="#catalog" class="btn">Перейти в каталог</a>
+            </div>
+        </section>
+
+        <section id="catalog" class="catalog container">
+            <h2>Каталог товаров</h2>
+
+            <div class="filters">
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Поиск товаров..."
+                    autocomplete="off"
+                >
+                <select id="categoryFilter">
+                    <option value="">Все категории</option>
+                    <option value="Электроника">Электроника</option>
+                    <option value="Одежда">Одежда</option>
+                    <option value="Цифровые товары">Цифровые товары</option>
+                    <option value="Дом и быт">Дом и быт</option>
+                    <option value="Другое">Другое</option>
+                </select>
+            </div>
+
+            <div id="productGrid" class="product-grid"></div>
+        </section>
+
+        <section id="seller" class="seller-section">
+            <div class="container">
+                <h2>Стань продавцом ARVION</h2>
+                <p>Размещай свои товары и находи покупателей.</p>
+                <button id="sellerBtn" class="btn">Стать продавцом</button>
+            </div>
+        </section>
+
+        <section id="account" class="account-section container">
+            <h2>Личный кабинет</h2>
+            <div id="accountPanel"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© <span id="year"></span> ARVION Marketplace. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="closeModal" class="close-modal" aria-label="Закрыть">×</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
