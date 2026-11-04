@@ -1,55 +1,6 @@
-const KEY = 'arvion_demo_v1';
+const KEY = 'arvion_demo_v2';
 
-const seed = [
-    {
-        id: 1,
-        title: 'Беспроводные наушники',
-        category: 'Электроника',
-        price: 2490,
-        currency: 'KGS',
-        seller: 'ARVION Store',
-        telegram: '',
-        type: 'Физический',
-        icon: '🎧',
-        description: 'Удобные беспроводные наушники на каждый день.'
-    },
-    {
-        id: 2,
-        title: 'Минималистичная худи',
-        category: 'Одежда',
-        price: 1800,
-        currency: 'KGS',
-        seller: 'Urban Wear',
-        telegram: '',
-        type: 'Физический',
-        icon: '👕',
-        description: 'Базовая худи в минималистичном стиле.'
-    },
-    {
-        id: 3,
-        title: 'Набор цифровых шаблонов',
-        category: 'Цифровые товары',
-        price: 590,
-        currency: 'KGS',
-        seller: 'Design Lab',
-        telegram: '',
-        type: 'Цифровой',
-        icon: '🗂️',
-        description: 'Коллекция шаблонов для личных и рабочих проектов.'
-    },
-    {
-        id: 4,
-        title: 'Настольная лампа',
-        category: 'Дом и быт',
-        price: 1250,
-        currency: 'KGS',
-        seller: 'Home Point',
-        telegram: '',
-        type: 'Физический',
-        icon: '💡',
-        description: 'Лаконичная лампа для рабочего стола.'
-    }
-];
+const seed = [];
 
 function load() {
     try {
@@ -160,7 +111,11 @@ function render() {
                 </div>
             </article>
         `).join('')
-        : '<div class="empty">По вашему запросу ничего не найдено.</div>';
+        : `<div class="empty">
+            ${state.products.length === 0
+                ? 'Каталог пока пуст. Станьте продавцом и добавьте первый товар.'
+                : 'По вашему запросу ничего не найдено.'}
+           </div>`;
 
     grid.querySelectorAll('[data-product-id]').forEach(btn => {
         btn.onclick = () => openProduct(Number(btn.dataset.productId));
