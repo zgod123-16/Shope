@@ -1,30 +1,71 @@
 const KEY = 'arvion_demo_v2';
+const REMEMBER_KEY = 'arvion_remember_v1';
 
 const seed = [];
 
 function load() {
     try {
-        return JSON.parse(localStorage.getItem(KEY)) || {
-            users: [],
-            products: seed,
-            orders: [],
-            currentUser: null
-        };
+        const data = JSON.parse(localStorage.getItem(KEY));
+        if (data && typeof data === 'object') {
+            return {
+                users: Array.isArray(data.users) ? data.users : [],
+                products: Array.isArray(data.products) ? data.products : seed,
+                orders: Array.isArray(data.orders) ? data.orders : [],
+                currentUser: data.currentUser || null
+            };
+        }
+    } catch (_) {}
+    return {
+        users: [],
+        products: seed,
+        orders: [],
+        currentUser: null
+    };
+}
+
+function loadRemembered() {
+    try {
+        return JSON.parse(localStorage.getItem(REMEMBER_KEY)) || null;
     } catch {
-        return {
-            users: [],
-            products: seed,
-            orders: [],
-            currentUser: null
+        return null;
+    }
+}
+
+function saveRemembered(email, password) {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email, password }));
+}
+
+function clearRemembered() {
+    localStorage.removeItem(REMEMBER_KEY);
+}
+
+let state = load();
+let currentUser = null;
+
+// Восстанавливаем сессию из сохранённого аккаунта
+if (state.currentUser && state.currentUser.email) {
+    const saved = state.users.find(u => u.id === state.currentUser.id || u.email === state.currentUser.email);
+    if (saved) {
+        currentUser = {
+            id: saved.id,
+            name: saved.name,
+            email: saved.email,
+            role: saved.role || 'buyer',
+            telegram: saved.telegram || ''
         };
     }
 }
 
-let state = load();
-let currentUser = state.currentUser || null;
-
 function save() {
-    state.currentUser = currentUser;
+    state.currentUser = currentUser
+        ? {
+            id: currentUser.id,
+            name: currentUser.name,
+            email: currentUser.email,
+            role: currentUser.role,
+            telegram: currentUser.telegram || ''
+        }
+        : null;
     localStorage.setItem(KEY, JSON.stringify(state));
 }
 
@@ -138,6 +179,7 @@ function closeModal() {
 
 function authForm(mode) {
     const reg = mode === 'register';
+    const remembered = !reg ? loadRemembered() : null;
 
     openModal(`
         <h2>${reg ? 'Создать аккаунт' : 'Войти'}</h2>
@@ -152,16 +194,24 @@ function authForm(mode) {
                 <input name="name" required minlength="2" autocomplete="name">
             ` : ''}
             <label>Email</label>
-            <input name="email" type="email" required autocomplete="email">
+            <input name="email" type="email" required autocomplete="email"
+                value="${remembered ? esc(remembered.email) : ''}">
             <label>Пароль</label>
-            <input name="password" type="password" required minlength="8" autocomplete="${reg ? 'new-password' : 'current-password'}">
+            <input name="password" type="password" required minlength="8"
+                autocomplete="${reg ? 'new-password' : 'current-password'}"
+                value="${remembered ? esc(remembered.password) : ''}">
+            <label class="remember-row">
+                <input type="checkbox" name="remember" ${remembered ? 'checked' : ''}>
+                <span>Запомнить email и пароль</span>
+            </label>
             <button class="btn" type="submit">
                 ${reg ? 'Зарегистрироваться' : 'Войти'}
             </button>
         </form>
         <p class="form-note">
-            Демо-версия: данные хранятся только в этом браузере.
-            Не используйте настоящий пароль.
+            Аккаунт и пароль сохраняются в этом браузере.
+            После закрытия страницы вы останетесь в системе.
+            Не используйте настоящий пароль — это демо.
         </p>
         <p class="subtle">
             ${reg ? 'Уже есть аккаунт?' : 'Нет аккаунта?'}
@@ -177,22 +227,40 @@ function authForm(mode) {
         const f = new FormData(e.target);
         const email = f.get('email').trim().toLowerCase();
         const password = f.get('password');
+        const remember = !!f.get('remember');
+
+        if (!email || !password) {
+            return toast('Заполните email и пароль.');
+        }
+
+        if (password.length < 8) {
+            return toast('Пароль должен быть не короче 8 символов.');
+        }
 
         if (reg) {
             if (state.users.some(u => u.email === email)) {
                 return toast('Этот email уже зарегистрирован.');
             }
 
+            const name = (f.get('name') || '').trim();
+            if (name.length < 2) {
+                return toast('Укажите имя или название магазина.');
+            }
+
             currentUser = {
                 id: Date.now(),
-                name: f.get('name').trim(),
+                name,
                 email,
                 role: 'buyer',
                 telegram: ''
             };
 
             state.users.push({
-                ...currentUser,
+                id: currentUser.id,
+                name: currentUser.name,
+                email: currentUser.email,
+                role: currentUser.role,
+                telegram: '',
                 password
             });
         } else {
@@ -208,15 +276,21 @@ function authForm(mode) {
                 id: u.id,
                 name: u.name,
                 email: u.email,
-                role: u.role,
+                role: u.role || 'buyer',
                 telegram: u.telegram || ''
             };
+        }
+
+        if (remember) {
+            saveRemembered(email, password);
+        } else {
+            clearRemembered();
         }
 
         save();
         closeModal();
         render();
-        toast('Вы вошли в аккаунт.');
+        toast(reg ? 'Аккаунт создан. Вы вошли.' : 'Вы вошли в аккаунт.');
     };
 
     document.getElementById('switchAuth').onclick = e => {
